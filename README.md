@@ -1,9 +1,4 @@
 
-* Nice tables, ok with your number of digits because it matters!
-* You sound more confident talking about the technical indicators now - it comes across well.
-* Maybe think about just presenting a subset of the technical indicators
-* Not sure why you have all the digits in the feature importances
-* Zoom in on plots where things are in important (where is the elbow?)
 * could try a 3d tsne - might yield more visual separation
 * Nice grid search talk - and I approve of AUC as the best metric - AUC is typically between 0 and 1
 * Put actual return on your predicted return graphs
@@ -80,7 +75,7 @@ http://developer.oanda.com/rest-live-v20/introduction/
 
 https://www.tradingview.com/
 
-* Future Opportunities: Incorporate more data, economic calendar, historical position ratios, bid ask spreads, commitments of traders, order book, tick data, etc. *
+*Future Opportunities: Incorporate more data, economic calendar, historical position ratios, bid ask spreads, commitments of traders, order book, tick data, etc.*
 
 # Target
 
@@ -103,7 +98,7 @@ I am using a binary classification target (1 / 0) of whether or not the close pr
 
 <img src="imgs/returns_hist.png" width="100%">
 
-* Future Opportunities: Incorporate regression not just classification. *
+*Future Opportunities: Incorporate regression not just classification.*
 
 # Features
 
@@ -152,7 +147,7 @@ I used each technical indicator with inputs 5, 15, 25, 35, and 45.
 
 https://mrjbq7.github.io/ta-lib/funcs.html
 
-* Future Opportunities: More technical indicators with varying parameters. *
+*Future Opportunities: More technical indicators with varying parameters.*
 
 # Feature Analysis
 
@@ -202,34 +197,36 @@ Also tried dimensionality reduction  with t-sne but the calculation was expensiv
 
 Data transformation and modeling pipelines were used to gridsearch cross validate the models and prevent data leakage. The data transformation steps included scaling, selecting the best features, and dimensionality reduction. Logistic regression, neural networks, and boosted trees were used for the models. Each step in the pipeline has a variety of parameters that can be tuned and each time granularity has . I used a powerful Amazon Web Service EC2 server to do the gridsearch parameter optimization in parallel. Both ROC_AUC and a Custom % Return scoring function was used for gridsearching.
 
-* Future Opportunities: Optimize the gridsearch scoring function to incorporate other financial metrics including alpha, beta, max drawdown, etc. *
+*Future Opportunities: Optimize the gridsearch scoring function to incorporate other financial metrics including alpha, beta, max drawdown, etc.*
 
 # Results
 
 Scaling the Features, No PCA, No Feature Selection, and Logistic Regression with Regularization for Feature Selection (L1 and L2 were very similar) on the 15 minute candles produced the best results. The MLP network that provided very similar results had 1 layer and a Logistic activation function. It was pretty much just a Logistic Regression algorithm with a fancier name.
 
-### 15 Minute Candles
+#### ROC Curve
 
-![alttext](/imgs/BADROC.png "Bad ROC")
+<img src="/imgs/roc_multiple_models.png" width="100%">
 
-![alttext](/imgs/calcreturns.png "Bad ROC")
+#### Returns
 
-### Logistic Regression
+<img src="/imgs/returns_mult_models.png" width="100%">
 
-![alttext](/imgs/lr_gran_auc.png "Logistic Regression ROC")
-![alttext](/imgs/lr_gran_returns.png "Logistic Regression Returns")
+#### Logistic Regression
 
-### Neural Network
+<img src="/imgs/lr_gran_auc.png" width="100%">
+<img src="/imgs/lr_gran_returns.png" width="100%">
+
+#### Neural Network
 
 ![alttext](/imgs/nn_gran_auc.png "Neural Network ROC")
 ![alttext](/imgs/nn_gran_returns.png "Neural Network Returns")
 
-### XGBoost Classifier
+#### XGBoost Classifier
 
-![alttext](/imgs/xg_gran_auc.png "XGBoost ROC")
-![alttext](/imgs/xg_gran_returns.png "XGBoost Returns")
+<img src="/imgs/xg_gran_auc.png" width="100%">
+<img src="/imgs/xg_gran_returns.png" width="100%">
 
-* Future Opportunities: Stack classification and regression models. Tune a trading strategy based upon probabilities. Use a proper backtesting library incorporating bid / ask spreads, trading fees. *
+*Future Opportunities: Stack classification and regression models. Tune a trading strategy based upon probabilities. Use a backtesting library (zipline) incorporating bid / ask spreads, trading fees.*
 
 # Paper Trading
 
@@ -246,23 +243,23 @@ The web app has a script that continuously updates the SQL database with new can
 
 # Tech Stack
 
-<img src="/imgs/oanda_logo.svg" width="20%">
+<img src="/imgs/oanda_logo.svg" width="30%">
 
-<img src="/imgs/postgresql.gif" width="20%">
+<img src="/imgs/postgresql.gif" width="30%">
 
-<img src="/imgs/numpy_project_page.jpg" width="20%">
+<img src="/imgs/numpy_project_page.jpg" width="30%">
 
-<img src="/imgs/pandas_logo.png" width="20%">
+<img src="/imgs/pandas_logo.png" width="30%">
 
-<img src="/imgs/matplotliblogo.svg" width="20%">
+<img src="/imgs/matplotliblogo.svg" width="30%">
 
-<img src="/imgs/talib.png" width="20%">
+<img src="/imgs/talib.png" width="30%">
 
-<img src="/imgs/scikit-learn-logo.png" width="20%">
+<img src="/imgs/scikit-learn-logo.png" width="30%">
 
-<img src="/imgs/flask.png" width="20%">
+<img src="/imgs/flask.png" width="30%">
 
-<img src="/imgs/AmazonWebservices_Logo.svg" width="20%">
+<img src="/imgs/AmazonWebservices_Logo.svg" width="30%">
 
 # Resources
 

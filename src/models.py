@@ -285,16 +285,24 @@ def get_variety_pipes():
     gnb = GaussianNB()
     qda = QuadraticDiscriminantAnalysis()
     lr_l2_c1 = Pipeline([('scale',StandardScaler()), ('clf', LogisticRegression(penalty='l2', C=1))])
+    dt = Pipeline([('scale',StandardScaler()), ('clf', DecisionTreeClassifier())])
+    rf = Pipeline([('scale',StandardScaler()), ('clf', RandomForestClassifier(n_estimators=100))])
+    gb = Pipeline([('scale',StandardScaler()), ('clf', GradientBoostingClassifier(n_estimators=500))])
+    mlp = Pipeline([('scale',StandardScaler()), ('clf', MLPClassifier(hidden_layer_sizes=(100,3)))])
     # pca_lr_l1 = Pipeline([('pca', PCA(.99)), ('clf', LogisticRegression(penalty='l1', C=1))])
     # pca_lr_l2 = Pipeline([('pca', PCA(.99)), ('clf', LogisticRegression(penalty='l2', C=1))])
-    lr_l2_c10 = Pipeline([('clf', LogisticRegression(penalty='l2', C=10))])
-    lr_l2_c01 = Pipeline([('clf', LogisticRegression(penalty='l2', C=.01))])
+    # lr_l2_c10 = Pipeline([('clf', LogisticRegression(penalty='l2', C=10))])
+    # lr_l2_c01 = Pipeline([('clf', LogisticRegression(penalty='l2', C=.01))])
     # lr_mm_scale = Pipeline([('scale',MinMaxScaler()), ('clf', LogisticRegression(penalty='l2', C=1))])
     # lr_ss_scale = Pipeline([('scale',StandardScaler()), ('clf', LogisticRegression())])
     # lr_ss_scale = Pipeline([('scale',StandardScaler()), ('pca', PCA(.99)), ('clf', gb)])
     # classifiers = [lr, gb, ml]
     pipes = {
-    'lr_l2_c1': lr_l2_c1
+    'Logistic Regression': lr_l2_c1,
+    'Decision Tree': dt,
+    'Random Forest': rf,
+    'Gradient Boosting': gb,
+    'Multilayer Perceptron': mlp
     # 'lr_l2_c10': lr_l2_c10,
     # 'lr_l2_c01': lr_l2_c01
     }
@@ -523,17 +531,21 @@ def plot_prediction_roc(mod_name, prediction_df):
         roc_auc = auc(fpr, tpr) * 100
         plt.plot(fpr, tpr, lw=2, label='{} auc: {:.2f}'.format(mod_name, roc_auc))
     plt.plot([0, 1], [0, 1], 'k--', lw=1)
+    plt.xlabel('false positive rate')
+    plt.ylabel('true positive rate')
     plt.legend(loc='best')
 
 def plot_prediction_returns(prediction_df):
     '''
     plot returns
     '''
-    return_cols = [col for col in prediction_df.columns if col[-12:] == 'pred_returns' or col[:11] == 'log_returns']
+    return_cols = [col for col in prediction_df.columns if col[-14:] == '1_pred_returns']
     for return_col in return_cols:
         pred_returns = prediction_df[return_col]
         cum_returns = pred_returns.cumsum().apply(np.exp)-1 #you can add log returns and then transpose back with np.exp
         plt.plot(cum_returns)
+    plt.xlabel('time')
+    plt.ylabel('percent returns')
     plt.legend(loc='best')
 
 def plot_dim_2(x, y):
@@ -579,6 +591,7 @@ def plot_pca_elbow(x):
     plt.clf()
     plt.axes([.2, .2, .7, .7])
     plt.plot(pca.explained_variance_)
+    plt.xlim(0, 30)
     plt.xlabel('n_components')
     plt.ylabel('explained_variance_')
 
@@ -639,7 +652,7 @@ def all_steps_for_models_cross_val():
 def all_steps_for_grans_one_model_cross_val():
     table_names = ['eur_usd_d', 'eur_usd_h12', 'eur_usd_h6', 'eur_usd_h1', 'eur_usd_m30', 'eur_usd_m15', 'eur_usd_m1']
     start_time_stamps = [datetime(2000,1,1), datetime(2000,1,1), datetime(2000,1,1), datetime(2000,1,1), datetime(2006,1,1), datetime(2012,1,1), datetime(2017,5,1)]
-    pipes_xg = get_xg_grids()
+    pipes_nn = get_nn_grids()
     prediction_dfs = {}
     for i in range(len(table_names)):
         gran = table_names[i]
@@ -650,11 +663,11 @@ def all_steps_for_grans_one_model_cross_val():
         df = add_features(df)
         print('added features')
         x, y, last_x_pred, last_x_ohlcv = split_data_x_y(df)
-        pipe_xg = pipes_xg[gran+'_xg']
+        pipe_nn = pipes_nn[gran+'_nn']
         print('got pipe')
-        prediction_df_xg = specific_model_gran_pipe_cross_val(x, y, df, gran, pipe_xg, n_splits=2)
-        prediction_df_xg = calc_and_print_prediction_returns_pred(prediction_df_xg)
-        prediction_dfs[gran+'_xg'] = prediction_df_xg
+        prediction_df_nn = specific_model_gran_pipe_cross_val(x, y, df, gran, pipe_nn, n_splits=2)
+        prediction_df_nn = calc_and_print_prediction_returns_pred(prediction_df_nn)
+        prediction_dfs[gran+'_nn'] = prediction_df_nn
     return prediction_dfs
 
 def for_mods_plot_roc_returns(prediction_dfs):
@@ -788,26 +801,27 @@ def live_trade_one_gran(instru='EUR_USD', gran='M15'):
 
 
 if __name__ == '__main__':
-    #for_gran_plot_pca()
+
 
     #dump_big_gridsearch()
 
     #live_predict_website()
 
+    prediction_dfs = all_steps_for_grans_one_model_cross_val()
+
     # prediction_dfs = all_steps_for_models_cross_val()
-    # for_mods_plot_roc_returns(prediction_dfs)
+    for_mods_plot_roc_returns(prediction_dfs)
 
 
-    df = get_data('EUR_USD_M15', datetime(2012,9,1), datetime(2018,6,1))
-    print('got data')
-    df = add_target(df)
-    print('added target')
-    df = add_features(df)
-    print(df.shape)
-    print('added features')
-    x, y, last_x_pred, last_x_ohlcv = split_data_x_y(df)
-    plot_dim_2(x, y)
-    plt.show()
+    # df = get_data('EUR_USD_M15', datetime(2012,9,1), datetime(2018,6,1))
+    # print('got data')
+    # df = add_target(df)
+    # print('added target')
+    # df = add_features(df)
+    # print(df.shape)
+    # print('added features')
+    # x, y, last_x_pred, last_x_ohlcv = split_data_x_y(df)
+    # for_gran_plot_pca()
 
     # # print(x.shape, y.shape)
 
