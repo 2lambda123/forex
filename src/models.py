@@ -311,27 +311,26 @@ def get_variety_pipes():
     return pipes
 
 def store_pipe_params():
-    pipeline = Pipeline([('scale',MinMaxScaler(feature_range=(0.00001, 1))), ('kbest', SelectKBest()), ('pca', PCA()), ('clf', LogisticRegression())])
-    parameters = [{
-    'clf': [LogisticRegression()],
-    'pca__n_components': [.6, .7, .8, .9, .95, 1],
-    'kbest__score_func': [chi2, f_classif, mutual_info_classif],
-    'kbest__k': list(range(10, 60, 5)),
-    'clf__penalty': ['l1', 'l2'],
-    'clf__C': [1, .1, .01, .001, .0001]
-    },{
-    'clf': [XGBClassifier()],
-    'pca__n_components': [.6, .7, .8, .9, .95],
-    'kbest__score_func': [chi2, f_classif, mutual_info_classif],
-    'kbest__k': list(range(10, 60, 5)),
-    'clf__n_estimators': [100, 200, 500, 1000],
-    'clf__max_depth': [3,5,8,10]},
+    pipeline = Pipeline([('scale',MinMaxScaler(feature_range=(0.00001, 1))), ('pca', PCA()), ('clf', MLPClassifier())])
+    parameters = [
+    # {
+    # 'clf': [LogisticRegression()],
+    # 'pca__n_components': [.6, .7, .8, .9, .95, 1],
+    # 'kbest__score_func': [chi2, f_classif, mutual_info_classif],
+    # 'kbest__k': list(range(10, 60, 5)),
+    # 'clf__penalty': ['l1', 'l2'],
+    # 'clf__C': [1, .1, .01, .001, .0001]
+    # },{
+    # 'clf': [XGBClassifier()],
+    # 'pca__n_components': [.6, .7, .8, .9, .95],
+    # 'kbest__score_func': [chi2, f_classif, mutual_info_classif],
+    # 'kbest__k': list(range(10, 60, 5)),
+    # 'clf__n_estimators': [100, 200, 500, 1000],
+    # 'clf__max_depth': [3,5,8,10]},
     {
     'clf': [MLPClassifier()],
-    'pca__n_components': [.7, .8, .9, .95],
-    'kbest__score_func': [chi2, f_classif, mutual_info_classif],
-    'kbest__k': list(range(10, 60, 5)),
-    'clf__hidden_layer_sizer': [(100,1), (100,2), (100,3)],
+    'pca__n_components': [50, 100, 150],
+    'clf__hidden_layer_sizer': [(50,50), (50,50,50), (100,100), (100,100,100), (150,150), (150,150,150)],
     'clf__activation': ['logistic', 'tanh', 'relu'],
     'clf__learning_rate_init': [.0001],
     'clf__batch_size': [500],
@@ -379,8 +378,8 @@ def dump_big_gridsearch(n_splits=2):
                                  scoring='roc_auc')
         grid_search.fit(x, y)
         grid_search_results = pd.DataFrame(grid_search.cv_results_)
-        pickle.dump(grid_search, open('../picklehistory/'+table_name+'_grid_object_v100.pkl', 'wb'))
-        pickle.dump(grid_search_results, open('../picklehistory/'+table_name+'_grid_results_v100.pkl', 'wb'))
+        pickle.dump(grid_search, open('../picklehistory/'+table_name+'_grid_object_v1000.pkl', 'wb'))
+        pickle.dump(grid_search_results, open('../picklehistory/'+table_name+'_grid_results_v1000.pkl', 'wb'))
 
 def load_gridsearch(file_name):
     '''
@@ -402,7 +401,7 @@ def get_nn_grids():
     pipes = {}
     for table in table_names:
         table_upper = table.upper()
-        pipes[table+'_nn'] = load_gridsearch('../picklehistory/nn/'+table_upper+'_grid_nn_object_v1.pkl').best_estimator_
+        pipes[table+'_nn'] = Pipeline([('scale',StandardScaler()), ('pca', PCA(100)), ('clf', MLPClassifier(hidden_layer_sizes=(100,100,100), activation="logistic", max_iter=5000, early_stopping=True, ))])
     return pipes
 
 def get_xg_grids():
@@ -803,14 +802,14 @@ def live_trade_one_gran(instru='EUR_USD', gran='M15'):
 if __name__ == '__main__':
 
 
-    #dump_big_gridsearch()
+    dump_big_gridsearch()
 
     #live_predict_website()
 
-    prediction_dfs = all_steps_for_grans_one_model_cross_val()
+    # prediction_dfs = all_steps_for_grans_one_model_cross_val()
 
     # prediction_dfs = all_steps_for_models_cross_val()
-    for_mods_plot_roc_returns(prediction_dfs)
+    # for_mods_plot_roc_returns(prediction_dfs)
 
 
     # df = get_data('EUR_USD_M15', datetime(2012,9,1), datetime(2018,6,1))

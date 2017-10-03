@@ -1,11 +1,8 @@
 
-* could try a 3d tsne - might yield more visual separation
-* Nice grid search talk - and I approve of AUC as the best metric - AUC is typically between 0 and 1
+
 * Put actual return on your predicted return graphs
 * For the ROC curves label the TPR and FPR axes.
 * What does paper trading mean?
-* Nice app
-* How is your paper trading doing?
 
 # * **`WORK IN PROGRESS DUE 10/10/2017`** *
 
@@ -31,7 +28,7 @@ Using classification machine learning models like logistic regression, neural ne
 
 # Historical Data
 
-The Oanda API was used to download historical EUR_USD candles to a PostgreSQL database. The data contains the volume, open, high, low, close mid prices (between bid / ask prices). The API only allows you to receive 5,000 records per request so I setup a script to download this information overnight. The database contains tables with the exchange price every 5 seconds, 10 seconds, 15 seconds, etc. from 2005 to today. Future examples will use the 15 minute candles because I got the best returns with this dataset.
+The Oanda API was used to download historical EUR_USD candles to a PostgreSQL database. The data contains the volume, open, high, low, close mid prices (between bid / ask prices). The API only allows you to receive 5,000 records per request so I setup a script to download this information overnight. The database contains tables with the exchange price every 5 seconds, 10 seconds, 15 seconds, etc. from 2005 to today.
 
 Granularity | Description
 --- | ---
@@ -195,7 +192,7 @@ Also tried dimensionality reduction  with t-sne but the calculation was expensiv
 
 # Modeling
 
-Data transformation and modeling pipelines were used to gridsearch cross validate the models and prevent data leakage. The data transformation steps included scaling, selecting the best features, and dimensionality reduction. Logistic regression, neural networks, and boosted trees were used for the models. Each step in the pipeline has a variety of parameters that can be tuned and each time granularity has . I used a powerful Amazon Web Service EC2 server to do the gridsearch parameter optimization in parallel. Both ROC_AUC and a Custom % Return scoring function was used for gridsearching.
+Data transformation and modeling pipelines were used to gridsearch cross validate the models and prevent data leakage. The data transformation steps included scaling, selecting the best features, and dimensionality reduction. Logistic regression, neural networks, and boosted trees were used for the models. Each step in the pipeline has a variety of parameters that can be tuned and each time granularity has different timeframe features selected. I used a powerful Amazon Web Service EC2 server to do the gridsearch parameter optimization in parallel. Both ROC_AUC and a Custom % Return scoring function was used for gridsearching.
 
 *Future Opportunities: Optimize the gridsearch scoring function to incorporate other financial metrics including alpha, beta, max drawdown, etc.*
 
@@ -214,23 +211,20 @@ Scaling the Features, No PCA, No Feature Selection, and Logistic Regression with
 #### Logistic Regression
 
 <img src="/imgs/lr_gran_auc.png" width="100%">
-<img src="/imgs/lr_gran_returns.png" width="100%">
 
 #### Neural Network
 
-![alttext](/imgs/nn_gran_auc.png "Neural Network ROC")
-![alttext](/imgs/nn_gran_returns.png "Neural Network Returns")
+<img src="/imgs/nn_gran_auc.png" width="100%">
 
 #### XGBoost Classifier
 
 <img src="/imgs/xg_gran_auc.png" width="100%">
-<img src="/imgs/xg_gran_returns.png" width="100%">
 
 *Future Opportunities: Stack classification and regression models. Tune a trading strategy based upon probabilities. Use a backtesting library (zipline) incorporating bid / ask spreads, trading fees.*
 
 # Paper Trading
 
-Currently the Logistic Regression model is being Paper Traded with the 15 Minute bars. The script is running on a free AWS EC2 instance with a PostgreSQL database to store the historical candles. We'll see how it does...
+Currently the Logistic Regression model is being Paper Traded (Fake Money with a Demo Account) with the 15 Minute bars. The script is running on a free AWS EC2 instance with a PostgreSQL database to store the historical candles. We'll see how it does...
 
 # Web Application
 
