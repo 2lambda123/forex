@@ -3,9 +3,7 @@
 
 # **EUR/USD Foreign Exchange Rate Prediction**
 
-I am using logistic regression, neural networks, and boosted trees to predict the future direction of of the EUR/USD foreign exchange rates.
-
-LINK TO PREDICTION WEBSITE
+Using classification machine learning models like logistic regression, neural networks, and boosted trees to predict the future direction of of the EUR/USD foreign exchange rates with technical analysis.
 
 ## Table of Contents
 1. [Data](#data)
@@ -15,11 +13,12 @@ LINK TO PREDICTION WEBSITE
 5. [Results](#results)
 6. [Paper Trading](#paper-trading)
 7. [Web Application](#web-application)
-8. [Resources](#resources)
+8. [Tech Stack](#tech-stack)
+9. [Resources](#resources)
 
 # Data
 
-I used the Oanda API to download historical EUR_USD candles to a PostgreSQL database. The data contains the volume, open, high, low, close mid prices (between bid / ask prices). The API only allows you to receive 5,000 records per request so I setup a script to download this information overnight. The database contains tables with the exchange price every 5 seconds, 10 seconds, 15 seconds, etc. from 2005 to today as shown by the table below.
+The Oanda API was used to download historical EUR_USD candles to a PostgreSQL database. The data contains the volume, open, high, low, close mid prices (between bid / ask prices). The API only allows you to receive 5,000 records per request so I setup a script to download this information overnight. The database contains tables with the exchange price every 5 seconds, 10 seconds, 15 seconds, etc. from 2005 to today. Future examples will use the 15 minute candles because I got the best returns with this dataset.
 
 Granularity | Description
 --- | ---
@@ -60,15 +59,16 @@ M | 1 month candlesticks, aligned to first day of the month
 | 9:00:00 | 462 | 1.352970 | 1.353070 | 1.351420 | 1.352820 | True |
 
 ### 1 Month Candles with Volume
+
 ![alttext](/imgs/1monthcandles.png "Forex Candles")
 
 http://developer.oanda.com/rest-live-v20/introduction/
 
-Future Opportunities: Incorporate more data, economic calendar, historical position ratios, bid ask spreads, commitments of traders, orderbook, tick data...
+Future Opportunities: Incorporate more data, economic calendar, historical position ratios, bid ask spreads, commitments of traders, order book, tick data, etc.
 
 # Target
 
-I am using a binary classification target (1 / 0) of whether or not the close price of the next candle is higher or lower than the close price of the current candle. I also calculated the log returns log(close n+1 / close n) that are used for calculating returns.
+I am using a binary classification target (1 / 0) of whether or not the close price of the next candle is higher or lower than the close price of the current candle. I also calculated the log returns log(close n+1 / close n) that are used for summing calculating total returns later.
 
 | time | volume | open | high | low | close | log_returns | log_returns_shifted | target |
 |----------|--------|----------|----------|----------|----------|-------------|---------------------|--------|
@@ -84,6 +84,7 @@ I am using a binary classification target (1 / 0) of whether or not the close pr
 | 20:30:00 | 27 | 1.355900 | 1.356000 | 1.355800 | 1.356000 | 0.000148 | -0.001033 | 0 |
 
 ### Log Returns Distribution vs. Arithmetic Returns Distribution
+
 ![alttext](/imgs/returns.png "Forex Returns")
 
 Future Opportunities: Incorporate regression not just classification.
@@ -181,7 +182,7 @@ Future Opportunities: More technical indicators with varying parameters.
 
 # Feature Analysis
 
-I calculated feature importance of the technical indicators with a variety of methods using Chi Squared Test, ANOVA F-value test, Mutual Information test, Logistic Regression with Regularization, and Tree Based Gini Information Gain feature importance.
+Feature importance was calculated of the technical indicators with a variety of methods including Chi Squared Test, ANOVA F-value test, Mutual Information test, Logistic Regression with Regularization, and Tree Based Gini Information Gain feature importance.
 
 ### Chi Squared Calculation for Feature Importances
 
@@ -295,13 +296,14 @@ I calculated feature importance of the technical indicators with a variety of me
 
 ### PCA the Features to 2 Dimensions to Observe Separability
 
+Also tried dimensionality reduction  with t-sne but the calculation was expensive.
+
 ![alttext](/imgs/pca_2_m15.png "PCA 2")
 
-Future Opportunities: Try other dimensionality reduction algorithms (t-sne) and other feature selection methods.
 
 # Modeling
 
-I created data transformation and modeling pipelines that were used to gridsearch cross validated the models and preventing data leakage. The data transformation steps included scaling, selecting the best features, and dimensionality reduction. Logistic regression, neural networks, and boosted trees were used for the models. Each step in the pipeline has a variety of parameters that can be tuned. I used a powerful Amazon Web Service EC2 server to do the gridsearch parameter optimization in parallel. Both ROC_AUC and a Custom % Return scoring function was used for gridsearching.
+Data transformation and modeling pipelines were used to gridsearch cross validate the models and prevent data leakage. The data transformation steps included scaling, selecting the best features, and dimensionality reduction. Logistic regression, neural networks, and boosted trees were used for the models. Each step in the pipeline has a variety of parameters that can be tuned and each time granularity has . I used a powerful Amazon Web Service EC2 server to do the gridsearch parameter optimization in parallel. Both ROC_AUC and a Custom % Return scoring function was used for gridsearching.
 
 Future Opportunities: Optimize the gridsearch scoring function to incorporate other financial metrics including alpha, beta, max drawdown, etc.
 
@@ -344,6 +346,26 @@ The web app has a script that continuously updates the SQL database with new can
 
 
 ![alttext](/imgs/tradinglog.png "Trading Log")
+
+# Tech Stack
+
+![alttext](/imgs/oanda_logo.svg)
+
+![alttext](/imgs/postgresql.gif)
+
+![alttext](/imgs/numpy_project_page.jpg)
+
+![alttext](/imgs/pandas_logo.png)
+
+![alttext](/imgs/matplotliblogo.svg)
+
+![alttext](/imgs/talib.png)
+
+![alttext](/imgs/scikit-learn-logo.png)
+
+![alttext](/imgs/flask.png)
+
+![alttext](/imgs/AmazonWebservices_Logo.svg)
 
 # Resources
 
