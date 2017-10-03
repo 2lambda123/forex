@@ -304,91 +304,94 @@ def trade():
     model = Pipeline([('scale',StandardScaler()), ('clf', LogisticRegression(penalty='l2', C=1))])
     count = 0
     while True:
-        count+=1
-        print('iter {}'.format(count))
-        last_timestamp = get_last_timestamp(table_name)
-        params = {'price': 'M', 'granularity': 'M15',
-                  'count': 5000,
-                  'from': last_timestamp,
-                  'includeFirst': False,
-                  'alignmentTimezone': 'America/New_York'}
-        r = instruments.InstrumentsCandles(instrument='EUR_USD',params=params)
-        client.request(r)
-        resp = r.response
-        candle = []
-        for can in resp['candles']:
-            if can['complete'] == True and time_in_table(table_name, can['time']) == False:
-                candle.append((can['time'], can['volume'], can['mid']['c'], can['mid']['h'], can['mid']['l'], can['mid']['o'], can['complete']))
-        if candle:
-            start = time.time()
-            data_to_table(table_name, candle)
-            print('added {} candles'.format(len(candle)))
-            # last_month = int(candle[0][0][5:7])-1
-            # last_month_timestamp = candle[0][0][:5]+str(last_month).zfill(2)+candle[0][0][7:]
-            data = return_data_table_gt_time(table_name, '2008-01-01T00:00:00.000000000Z')
-            df = clean_data(data)
-            df = add_target(df)
-            df = add_features(df)
-            x, y, last_x_pred, last_x_ohlcv = split_data_x_y(df)
-            model.fit(x, y)
-            print('df shape: {} x shape: {} y shape {}'.format(df.shape, x.shape, y.shape))
-            print('last x with {}'.format(last_x_ohlcv))
-            y_pred = model.predict(last_x_pred)
-            units = current_long_short_units()
-            print('current long short units {}'.format(units))
-            order ={"order": {
-            "units": "1000",
-            "instrument": "EUR_USD",
-            "timeInForce": "FOK",
-            "type": "MARKET",
-            "positionFill": "DEFAULT"
-            }}
-            if y_pred == 1 and units == 0:
-                '''
-                buy 1000
-                '''
-                order_units = "100000"
-                order["order"]["units"] = order_units
-                r = orders.OrderCreate(accountID, data=order)
-                client.request(r)
-                print('y_pred == 1, units == 0\n', r.response)
-            elif y_pred == 0 and units == 0:
-                '''
-                sell 1000
-                '''
-                order_units = "-100000"
-                order["order"]["units"] = order_units
-                r = orders.OrderCreate(accountID, data=order)
-                client.request(r)
-                print('y_pred == 0, units == 0\n', r.response)
-            elif y_pred == 1 and units < 0:
-                '''
-                buy 2000
-                '''
-                order_units = "200000"
-                order["order"]["units"] = order_units
-                r = orders.OrderCreate(accountID, data=order)
-                client.request(r)
-                print('y_pred == 1, units < 0\n', r.response)
-            elif y_pred == 0 and units > 0:
-                '''
-                sell 2000
-                '''
-                order_units = "-200000"
-                order["order"]["units"] = order_units
-                r = orders.OrderCreate(accountID, data=order)
-                client.request(r)
-                print('y_pred == 0, units > 0\n', r.response)
-            elif y_pred == 1 and units > 0:
-                '''
-                wait
-                '''
-                print('y_pred == 1, units > 0')
-            elif y_pred == 0 and units < 0:
-                '''
-                wait
-                '''
-                print('y_pred == 0, units < 0')
+        try:
+            count+=1
+            print('iter {}'.format(count))
+            last_timestamp = get_last_timestamp(table_name)
+            params = {'price': 'M', 'granularity': 'M15',
+                      'count': 5000,
+                      'from': last_timestamp,
+                      'includeFirst': False,
+                      'alignmentTimezone': 'America/New_York'}
+            r = instruments.InstrumentsCandles(instrument='EUR_USD',params=params)
+            client.request(r)
+            resp = r.response
+            candle = []
+            for can in resp['candles']:
+                if can['complete'] == True and time_in_table(table_name, can['time']) == False:
+                    candle.append((can['time'], can['volume'], can['mid']['c'], can['mid']['h'], can['mid']['l'], can['mid']['o'], can['complete']))
+            if candle:
+                start = time.time()
+                data_to_table(table_name, candle)
+                print('added {} candles'.format(len(candle)))
+                # last_month = int(candle[0][0][5:7])-1
+                # last_month_timestamp = candle[0][0][:5]+str(last_month).zfill(2)+candle[0][0][7:]
+                data = return_data_table_gt_time(table_name, '2008-01-01T00:00:00.000000000Z')
+                df = clean_data(data)
+                df = add_target(df)
+                df = add_features(df)
+                model.fit(x, y)
+                x, y, last_x_pred, last_x_ohlcv = split_data_x_y(df)
+                print('df shape: {} x shape: {} y shape {}'.format(df.shape, x.shape, y.shape))
+                print('last x with {}'.format(last_x_ohlcv))
+                y_pred = model.predict(last_x_pred)
+                units = current_long_short_units()
+                print('current long short units {}'.format(units))
+                order ={"order": {
+                "units": "1000",
+                "instrument": "EUR_USD",
+                "timeInForce": "FOK",
+                "type": "MARKET",
+                "positionFill": "DEFAULT"
+                }}
+                if y_pred == 1 and units == 0:
+                    '''
+                    buy 1000
+                    '''
+                    order_units = "100000"
+                    order["order"]["units"] = order_units
+                    r = orders.OrderCreate(accountID, data=order)
+                    client.request(r)
+                    print('y_pred == 1, units == 0\n', r.response)
+                elif y_pred == 0 and units == 0:
+                    '''
+                    sell 1000
+                    '''
+                    order_units = "-100000"
+                    order["order"]["units"] = order_units
+                    r = orders.OrderCreate(accountID, data=order)
+                    client.request(r)
+                    print('y_pred == 0, units == 0\n', r.response)
+                elif y_pred == 1 and units < 0:
+                    '''
+                    buy 2000
+                    '''
+                    order_units = "200000"
+                    order["order"]["units"] = order_units
+                    r = orders.OrderCreate(accountID, data=order)
+                    client.request(r)
+                    print('y_pred == 1, units < 0\n', r.response)
+                elif y_pred == 0 and units > 0:
+                    '''
+                    sell 2000
+                    '''
+                    order_units = "-200000"
+                    order["order"]["units"] = order_units
+                    r = orders.OrderCreate(accountID, data=order)
+                    client.request(r)
+                    print('y_pred == 0, units > 0\n', r.response)
+                elif y_pred == 1 and units > 0:
+                    '''
+                    wait
+                    '''
+                    print('y_pred == 1, units > 0')
+                elif y_pred == 0 and units < 0:
+                    '''
+                    wait
+                    '''
+                    print('y_pred == 0, units < 0')
+            except Exception as e:
+                print(e)
         time.sleep(30)
 
 

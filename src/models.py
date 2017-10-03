@@ -549,6 +549,8 @@ def plot_dim_2(x, y):
     x_new_zero = x_new[y==0]
     ax.scatter(x_new_one[:,0], x_new_one[:,1], c='green', label='up', alpha=.05)
     ax.scatter(x_new_zero[:,0], x_new_zero[:,1], c='orange', label='down', alpha=.05)
+    ax.set_xlabel('pca 1')
+    ax.set_ylabel('pca 2')
     plt.legend(loc='best')
 
 def plot_line_data(price_series, figtitle):
@@ -587,6 +589,22 @@ def plot_pred_proba_hist(plot_title, y_pred_proba):
     fig, ax = plt.subplots()
     ax.hist(y_pred_proba, bins=100)
     ax.set_title(plot_title)
+
+def plot_return_dist(df):
+    '''
+    plot predict proba distribution
+    '''
+    return_types = ['log_returns']
+    fig, ax = plt.subplots(1, len(return_types), figsize=(25,10))
+    i=0
+    # for i, ax in enumerate(axes.reshape(-1)):
+    returns = df[return_types[i]].dropna().values.reshape(-1,1)
+    ax.hist(returns, bins=5000)
+    ax.set_title(return_types[i])
+    ax.set_xlim(-.005, .005)
+    ax.set_ylabel('frequency')
+    ax.set_xlabel('returns')
+    plt.show()
 
 def all_steps_simple_feature_importance():
     df = get_data('EUR_USD_M15', datetime(2012,1,1), datetime(2018,1,1))
@@ -776,18 +794,21 @@ if __name__ == '__main__':
 
     #live_predict_website()
 
-    prediction_dfs = all_steps_for_models_cross_val()
-    for_mods_plot_roc_returns(prediction_dfs)
+    # prediction_dfs = all_steps_for_models_cross_val()
+    # for_mods_plot_roc_returns(prediction_dfs)
 
 
-    # df = get_data('EUR_USD_M15', datetime(2017,9,1), datetime(2018,6,1))
-    # print('got data')
-    # df = add_target(df)
-    # print('added targets')
-    # df = add_features(df)
-    # print(df.shape)
-    # print('added features')
-    # x, y, last_x_pred, last_x_ohlcv = split_data_x_y(df)
+    df = get_data('EUR_USD_M15', datetime(2012,9,1), datetime(2018,6,1))
+    print('got data')
+    df = add_target(df)
+    print('added target')
+    df = add_features(df)
+    print(df.shape)
+    print('added features')
+    x, y, last_x_pred, last_x_ohlcv = split_data_x_y(df)
+    plot_dim_2(x, y)
+    plt.show()
+
     # # print(x.shape, y.shape)
 
     #live_trade_one_gran()
