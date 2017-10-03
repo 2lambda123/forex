@@ -349,23 +349,23 @@ The web app has a script that continuously updates the SQL database with new can
 
 # Tech Stack
 
-![alttext](/imgs/oanda_logo.svg)
+<img src="/imgs/oanda_logo.svg" width="20%">
 
-![alttext](/imgs/postgresql.gif)
+<img src="/imgs/postgresql.gif" width="20%">
 
-![alttext](/imgs/numpy_project_page.jpg)
+<img src="/imgs/numpy_project_page.jpg" width="20%">
 
-![alttext](/imgs/pandas_logo.png)
+<img src="/imgs/pandas_logo.png" width="20%">
 
-![alttext](/imgs/matplotliblogo.svg)
+<img src="/imgs/matplotliblogo.svg" width="20%">
 
-![alttext](/imgs/talib.png)
+<img src="/imgs/talib.png" width="20%">
 
-![alttext](/imgs/scikit-learn-logo.png)
+<img src="/imgs/scikit-learn-logo.png" width="20%">
 
-![alttext](/imgs/flask.png)
+<img src="/imgs/flask.png" width="20%">
 
-![alttext](/imgs/AmazonWebservices_Logo.svg)
+<img src="/imgs/AmazonWebservices_Logo.svg" width="20%">
 
 # Resources
 
