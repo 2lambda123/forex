@@ -311,32 +311,29 @@ def get_variety_pipes():
     return pipes
 
 def store_pipe_params():
-    pipeline = Pipeline([('scale',MinMaxScaler(feature_range=(0.00001, 1))), ('pca', PCA()), ('clf', MLPClassifier())])
+    pipeline = Pipeline([('scale',StandardScaler()), ('pca', PCA()), ('clf', LogisticRegression())])
     parameters = [
-    # {
-    # 'clf': [LogisticRegression()],
-    # 'pca__n_components': [.6, .7, .8, .9, .95, 1],
-    # 'kbest__score_func': [chi2, f_classif, mutual_info_classif],
-    # 'kbest__k': list(range(10, 60, 5)),
-    # 'clf__penalty': ['l1', 'l2'],
-    # 'clf__C': [1, .1, .01, .001, .0001]
-    # },{
+    {
+    'clf': [LogisticRegression()],
+    'pca__n_components': list(range(2, 207, 5)),
+    'clf__C': [1, .1]
+    }]
     # 'clf': [XGBClassifier()],
     # 'pca__n_components': [.6, .7, .8, .9, .95],
     # 'kbest__score_func': [chi2, f_classif, mutual_info_classif],
     # 'kbest__k': list(range(10, 60, 5)),
     # 'clf__n_estimators': [100, 200, 500, 1000],
     # 'clf__max_depth': [3,5,8,10]},
-    {
-    'clf': [MLPClassifier()],
-    'pca__n_components': [50, 100, 150],
-    'clf__hidden_layer_sizes': [(50,50), (50,50,50), (100,100), (100,100,100), (150,150), (150,150,150)],
-    'clf__activation': ['logistic', 'tanh', 'relu'],
-    'clf__learning_rate_init': [.0001],
-    'clf__batch_size': [500],
-    'clf__max_iter': [5000],
-    'clf__early_stopping': [True]
-    }]
+    # {
+    # 'clf': [MLPClassifier()],
+    # 'pca__n_components': [50, 100, 150],
+    # 'clf__hidden_layer_sizes': [(50,50), (50,50,50), (100,100), (100,100,100), (150,150), (150,150,150)],
+    # 'clf__activation': ['logistic', 'tanh', 'relu'],
+    # 'clf__learning_rate_init': [.0001],
+    # 'clf__batch_size': [500],
+    # 'clf__max_iter': [5000],
+    # 'clf__early_stopping': [True]
+    # }]
     return pipeline, parameters
 
 def gridsearch_score_returns(y_true, y_pred):
@@ -354,8 +351,8 @@ def dump_big_gridsearch(n_splits=2):
     '''
     grid search every model and return gridsearch and results
     '''
-    table_names = ['eur_usd_d', 'eur_usd_h12', 'eur_usd_h6', 'eur_usd_h1', 'eur_usd_m30', 'eur_usd_m15', 'eur_usd_m1']
-    start_time_stamps = [datetime(2000,1,1), datetime(2000,1,1), datetime(2000,1,1), datetime(2000,1,1), datetime(2006,1,1), datetime(2012,1,1), datetime(2017,5,1)]
+    table_names = ['eur_usd_m15']#['eur_usd_d', 'eur_usd_h12', 'eur_usd_h6', 'eur_usd_h1', 'eur_usd_m30', 'eur_usd_m15', 'eur_usd_m1']
+    start_time_stamps = [datetime(2007,1,1)]#[datetime(2000,1,1), datetime(2000,1,1), datetime(2000,1,1), datetime(2000,1,1), datetime(2006,1,1), datetime(2012,1,1), datetime(2017,5,1)]
     for i in range(len(table_names)):
         table_name = table_names[i].upper()
         from_time = start_time_stamps[i]
@@ -369,7 +366,7 @@ def dump_big_gridsearch(n_splits=2):
         print('starting grid search')
         score_returns = make_scorer(gridsearch_score_returns, greater_is_better=True)
         pipeline, parameters = store_pipe_params()
-        parameters = parameters[2]
+        parameters = parameters[0]
         grid_search = GridSearchCV(pipeline,
                                  param_grid=parameters,
                                  verbose=1,
@@ -378,8 +375,8 @@ def dump_big_gridsearch(n_splits=2):
                                  scoring='roc_auc')
         grid_search.fit(x, y)
         grid_search_results = pd.DataFrame(grid_search.cv_results_)
-        pickle.dump(grid_search, open('../picklehistory/'+table_name+'_grid_object_v1000.pkl', 'wb'))
-        pickle.dump(grid_search_results, open('../picklehistory/'+table_name+'_grid_results_v1000.pkl', 'wb'))
+        pickle.dump(grid_search, open('../picklehistory/'+table_name+'_grid_object_vlr.pkl', 'wb'))
+        pickle.dump(grid_search_results, open('../picklehistory/'+table_name+'_grid_results_vlr.pkl', 'wb'))
 
 def load_gridsearch(file_name):
     '''
@@ -600,10 +597,10 @@ def plot_pca_elbow(x):
     plt.figure(1)
     plt.clf()
     plt.axes([.2, .2, .7, .7])
-    plt.plot(pca.explained_variance_)
+    plt.plot(pca.explained_variance_ratio_)
     plt.xlim(0, 30)
     plt.xlabel('n_components')
-    plt.ylabel('explained_variance_')
+    plt.ylabel('explained_variance_ratio_')
 
 def plot_pred_proba_hist(plot_title, y_pred_proba):
     '''
@@ -689,7 +686,7 @@ def for_mods_plot_roc_returns(prediction_dfs):
     plt.show()
 
 def for_gran_plot_pca():
-    df = get_data('EUR_USD_M15', datetime(2012,1,1), datetime(2018,1,1))
+    df = get_data('EUR_USD_M15', datetime(2007,1,1), datetime(2018,1,1))
     print('got data')
     df = add_target(df)
     print('added targets')
@@ -812,18 +809,18 @@ def live_trade_one_gran(instru='EUR_USD', gran='M15'):
 
 if __name__ == '__main__':
 
-
-    #dump_big_gridsearch()
+    #no_params_df, only_time_period_df, other_param_df = feature_dfs()
+    # dump_big_gridsearch()
 
     #live_predict_website()
-    dump_live_model()
+    # dump_live_model()
     # prediction_dfs = all_steps_for_grans_one_model_cross_val()
     #
     #
     # prediction_dfs = all_steps_for_models_cross_val()
     # for_mods_plot_roc_returns(prediction_dfs)
 
-
+    # 
     # df = get_data('EUR_USD_M15', datetime(2012,9,1), datetime(2018,6,1))
     # print('got data')
     # df = add_target(df)
@@ -833,7 +830,8 @@ if __name__ == '__main__':
     # print('added features')
     # x, y, last_x_pred, last_x_ohlcv = split_data_x_y(df)
     # print(x.shape)
-    # for_gran_plot_pca()
+    #
+    for_gran_plot_pca()
 
     # # print(x.shape, y.shape)
 
@@ -843,26 +841,3 @@ if __name__ == '__main__':
 
 
     #prediction_df_nn, prediction_df_xg = all_steps_gran_cross_val()
-
-
-    '''
-    proba_cols = [col for col in prediction_df.columns if col[-5:] == 'proba']
-    for pred_col in proba_cols:
-        sp_ind = re.search('_\d_', pred_col).group(0)[1]
-        plot_prediction_roc(pred_col, prediction_df['y_test_{}'.format(sp_ind)], prediction_df[pred_col])
-    plt.show()
-    return_cols = [col for col in prediction_df.columns if col[-7:] == 'returns' or col[:3] == 'log']
-    for return_col in return_cols:
-        plot_prediction_returns(prediction_df[return_col])
-    plt.show()
-    proba_cols = [col for col in prediction_df.columns if col[-5:] == 'proba']
-    for return_col in proba_cols:
-        plot_pred_proba_hist(return_col, prediction_df[return_col])
-    plt.show()
-    plot_compare_scalers(df)
-    plt.show()
-    plot_dim_2(x, y)
-    plt.show()
-    plot_pca_elbow(x)
-    plt.show()
-    '''

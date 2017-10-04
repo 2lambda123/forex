@@ -1,6 +1,6 @@
 # **EUR/USD Foreign Exchange Rate Prediction**
 
-Using classification machine learning models like logistic regression, boosted trees, and neural networks to predict the future direction of of the EUR/USD foreign exchange rates with technical analysis.
+Used classification machine learning models like logistic regression, boosted trees, and neural networks to predict the future direction of of the EUR/USD foreign exchange rates with technical analysis.
 
 #### Table of Contents
 1. [Data Flow Diagram](#data-flow-diagram)
@@ -16,11 +16,11 @@ Using classification machine learning models like logistic regression, boosted t
 
 # Data Flow Diagram
 
-<img src="/imgs/dataflow.png" width="100%">
+<img src="/imgs/dataflowdiagram.png" width="100%">
 
 # Historical Data
 
-The Oanda API was used to download historical EUR/USD candles to a PostgreSQL database. The data contains the volume, open, high, low, close mid prices (between bid / ask prices). The API only allows you to receive 5,000 records per request so I setup a script to download this information overnight. The database contains tables with the exchange price every 5 seconds, 10 seconds, 15 seconds, etc. from 2005 to today.
+The Oanda API was used to download historical EUR/USD candles to a PostgreSQL database. A candle is the open, high, low, and close price over a time period.  Mid prices (between bid / ask prices) were used. The API only allows you to receive 5,000 records per request so I setup a script to download this information overnight. The database contains separate tables with the OHLC and Volume every 5 seconds, 10 seconds, 15 seconds, etc. from 2005 to today.
 
 Granularity | Description
 --- | ---
@@ -68,7 +68,7 @@ https://www.tradingview.com/
 
 # Target
 
-I am using a binary classification target (1 / 0) of whether or not the close price of the next candle is higher or lower than the close price of the current candle. I also calculated the log returns log(close n+1 / close n) that are used for calculating total returns later.
+I am using a binary classification target (1 / 0) of whether or not the close price of the next candle is higher or lower than the close price of the current candle. I also calculated the log returns which are used for calculating total returns at the end.
 
 | time | volume | open | high | low | close | log_returns | log_returns_shifted | target |
 |----------|--------|----------|----------|----------|----------|-------------|---------------------|--------|
@@ -91,7 +91,7 @@ I am using a binary classification target (1 / 0) of whether or not the close pr
 
 # Features
 
-Below are the technical analysis features that were added to the data.
+Technical Analysis Indicators were used as features for this analysis. A range of parameters were used for each indicator and the dimensionality was later reduced by feature importance calculations, PCA, or regularization within the models.
 
 #### Sample of Technical Indicators without Parameters
 
@@ -184,7 +184,7 @@ Also tried dimensionality reduction  with t-sne but the calculation was expensiv
 
 # Modeling
 
-Data transformation and modeling pipelines were used to gridsearch cross validate the models and prevent data leakage. The data transformation steps included scaling, selecting the best features, and dimensionality reduction. Logistic regression, boosted trees, and neural networks were used for the models. Each step in the pipeline has a variety of parameters that can be tuned and each time granularity has different timeframe features selected. I used a powerful Amazon Web Service EC2 server to do the gridsearch parameter optimization in parallel. Both ROC_AUC and a Custom % Return scoring function was used for gridsearching.
+Data transformation and modeling pipelines were used to gridsearch and cross validate the models and prevent data leakage. The data transformation steps include scaling, selecting the best features, and dimensionality reduction. Logistic regression, boosted trees, and neural networks were used for the models. Each step in the pipeline has a variety of parameters that can be tuned and each time granularity uses its most important features and feature timeframes. I used a powerful Amazon Web Service EC2 server to compute the gridsearch parameter optimization in parallel. Both ROC AUC and a Custom % Return function were used for gridsearching scoring.
 
 *Future Opportunities: Optimize the gridsearch scoring function to incorporate other financial metrics including alpha, beta, max drawdown, etc.*
 
@@ -208,11 +208,11 @@ Scaling the Features, PCA down to 100 dimensions, and the Logistic Regression wi
 
 # Paper Trading
 
-Currently the Logit model is being Paper Traded (Fake Money with a Demo Account) with the 15 Minute bars. The script is running on a free AWS EC2 instance with a PostgreSQL database to store the historical candles. We'll see how it does...
+Currently the Logistic Regression model is being Paper Traded (Fake Money with a Demo Account) with the 15 Minute Candle Model. The script is running on a free AWS EC2 instance with a PostgreSQL database to store the historical candles. We'll see how it does...
 
 # Web Application
 
-The web app has a script that continuously updates the SQL database with new candles for each granularity. A Logistic Regression model is used to predict the future direction for each candle granularity. The predictions and the best features for each candle are displayed in a table.
+The web app has a script that continuously updates the SQL database with new candles for each granularity. Gridsearched Logistic Regression models are used to predict the future direction for each candle granularity then the predictions and best features are displayed in a table.
 
 <img src="/imgs/webapp.png" width="100%">
 
