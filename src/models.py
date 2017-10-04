@@ -330,7 +330,7 @@ def store_pipe_params():
     {
     'clf': [MLPClassifier()],
     'pca__n_components': [50, 100, 150],
-    'clf__hidden_layer_sizer': [(50,50), (50,50,50), (100,100), (100,100,100), (150,150), (150,150,150)],
+    'clf__hidden_layer_sizes': [(50,50), (50,50,50), (100,100), (100,100,100), (150,150), (150,150,150)],
     'clf__activation': ['logistic', 'tanh', 'relu'],
     'clf__learning_rate_init': [.0001],
     'clf__batch_size': [500],
@@ -401,7 +401,7 @@ def get_nn_grids():
     pipes = {}
     for table in table_names:
         table_upper = table.upper()
-        pipes[table+'_nn'] = Pipeline([('scale',StandardScaler()), ('pca', PCA(100)), ('clf', MLPClassifier(hidden_layer_sizes=(100,100,100), activation="logistic", max_iter=5000, early_stopping=True, ))])
+        pipes[table+'_nn'] = Pipeline([('scale',StandardScaler()), ('pca',PCA(100)), ('clf', MLPClassifier(hidden_layer_sizes=(100,100), activation="logistic", batch_size='auto', max_iter=5000, early_stopping=True))])
     return pipes
 
 def get_xg_grids():
@@ -411,6 +411,16 @@ def get_xg_grids():
         table_upper = table.upper()
         pipes[table+'_xg'] = load_gridsearch('../picklehistory/xg/'+table_upper+'_grid_xg_object_v1.pkl').best_estimator_
     return pipes
+
+def dump_live_model():
+    data = return_data_table('eur_usd_m15')
+    df = clean_data(data)
+    df = add_target(df)
+    df = add_features(df)
+    x, y, last_x_pred, last_x_ohlcv = split_data_x_y(df)
+    model = lr = Pipeline([('scale',StandardScaler()), ('pca',PCA(100)), ('clf', MLPClassifier(hidden_layer_sizes=(100,100), activation="logistic", batch_size='auto', max_iter=5000, early_stopping=True))])
+    model.fit(x, y)
+    pickle.dump(model, open('../picklehistory/live_nn_eur_usd_m15_model.pkl', 'wb'))
 
 def var_model_one_gran_pipe_cross_val(x, y, df, pipes, n_splits=2):
     '''
@@ -802,13 +812,14 @@ def live_trade_one_gran(instru='EUR_USD', gran='M15'):
 if __name__ == '__main__':
 
 
-    dump_big_gridsearch()
+    #dump_big_gridsearch()
 
     #live_predict_website()
-
+    dump_live_model()
     # prediction_dfs = all_steps_for_grans_one_model_cross_val()
-
-    # prediction_dfs = all_steps_for_models_cross_val()
+    #
+    #
+    # # prediction_dfs = all_steps_for_models_cross_val()
     # for_mods_plot_roc_returns(prediction_dfs)
 
 
@@ -820,6 +831,7 @@ if __name__ == '__main__':
     # print(df.shape)
     # print('added features')
     # x, y, last_x_pred, last_x_ohlcv = split_data_x_y(df)
+    # print(x.shape)
     # for_gran_plot_pca()
 
     # # print(x.shape, y.shape)

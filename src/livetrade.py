@@ -253,15 +253,14 @@ def split_data_x_y(df):
     return x, y, last_x_pred, last_x_ohlcv
 
 def fit_models():
-    while True:
-        data = return_data_table('eur_usd_m15')
-        df = clean_data(data)
-        df = add_target(df)
-        df = add_features(df)
-        x, y, last_x_pred, last_x_ohlcv = split_data_x_y(df)
-        model = lr = Pipeline([('scale',StandardScaler()), ('clf', LogisticRegression(penalty='l2', C=1))])
-        model.fit(x, y)
-        pickle.dump(model, open('../picklehistory/live_lr_eur_usd_m15_model.pkl', 'wb'))
+    data = return_data_table('eur_usd_m15')
+    df = clean_data(data)
+    df = add_target(df)
+    df = add_features(df)
+    x, y, last_x_pred, last_x_ohlcv = split_data_x_y(df)
+    model = lr = Pipeline([('scale',StandardScaler()), ('clf', LogisticRegression(penalty='l2', C=1))])
+    model.fit(x, y)
+    pickle.dump(model, open('../picklehistory/live_lr_eur_usd_m15_model.pkl', 'wb'))
 
 def streamer_ohlcv():
     '''
@@ -300,8 +299,8 @@ def streamer_ohlcv():
 def trade():
     client = oandapyV20.API(access_token=access_token)
     table_name = 'eur_usd_m15'
-    # model = pickle.load(open('../picklehistory/live_lr_eur_usd_m15_model.pkl', 'rb'))
-    model = Pipeline([('scale',StandardScaler()), ('clf', LogisticRegression(penalty='l2', C=1))])
+    model = pickle.load(open('../picklehistory/live_nn_eur_usd_m15_model.pkl', 'rb'))
+    #model = Pipeline([('scale',StandardScaler()), ('clf', LogisticRegression(penalty='l2', C=1))])
     count = 0
     while True:
         try:
@@ -390,7 +389,7 @@ def trade():
                     wait
                     '''
                     print('y_pred == 0, units < 0')
-            except Exception as e:
+        except Exception as e:
                 print(e)
         time.sleep(30)
 
