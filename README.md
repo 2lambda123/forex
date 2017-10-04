@@ -1,7 +1,6 @@
 
 
 * Put actual return on your predicted return graphs
-* For the ROC curves label the TPR and FPR axes.
 * What does paper trading mean?
 
 # * **`WORK IN PROGRESS DUE 10/10/2017`** *
@@ -76,7 +75,7 @@ https://www.tradingview.com/
 
 # Target
 
-I am using a binary classification target (1 / 0) of whether or not the close price of the next candle is higher or lower than the close price of the current candle. I also calculated the log returns log(close n+1 / close n) that are used for summing calculating total returns later.
+I am using a binary classification target (1 / 0) of whether or not the close price of the next candle is higher or lower than the close price of the current candle. I also calculated the log returns log(close n+1 / close n) that are used for calculating total returns later.
 
 | time | volume | open | high | low | close | log_returns | log_returns_shifted | target |
 |----------|--------|----------|----------|----------|----------|-------------|---------------------|--------|
@@ -114,7 +113,7 @@ Below are the technical analysis features that were added to the data.
 
 #### Sample of Technical Indicators with Only Timeperiod Parameter
 
-I used each technical indicator with inputs 5, 15, 25, 35, and 45.
+I used each technical indicator with timeperiod 5, 15, 25, 35, and 45.
 
 | Group | Short Name | Name | Parameters | Output |
 |-----------------------|---------------------|---------------------------------------------------|------------------|----------------------|
@@ -182,7 +181,7 @@ Feature importance was calculated of the technical indicators with a variety of 
 
 #### Explained Variance of Features
 
-![alttext](/imgs/pca_exp_var_m15.png "PCA Exp Variance")
+<img src="/imgs/pca_exp_var_m15.png" width="100%">
 
 #### PCA the Features to 2 Dimensions to Observe Separability
 
@@ -192,48 +191,39 @@ Also tried dimensionality reduction  with t-sne but the calculation was expensiv
 
 # Modeling
 
-Data transformation and modeling pipelines were used to gridsearch cross validate the models and prevent data leakage. The data transformation steps included scaling, selecting the best features, and dimensionality reduction. Logistic regression, neural networks, and boosted trees were used for the models. Each step in the pipeline has a variety of parameters that can be tuned and each time granularity has different timeframe features selected. I used a powerful Amazon Web Service EC2 server to do the gridsearch parameter optimization in parallel. Both ROC_AUC and a Custom % Return scoring function was used for gridsearching.
+Data transformation and modeling pipelines were used to gridsearch cross validate the models and prevent data leakage. The data transformation steps included scaling, selecting the best features, and dimensionality reduction. Logistic regression, boosted trees, and neural networks were used for the models. Each step in the pipeline has a variety of parameters that can be tuned and each time granularity has different timeframe features selected. I used a powerful Amazon Web Service EC2 server to do the gridsearch parameter optimization in parallel. Both ROC_AUC and a Custom % Return scoring function was used for gridsearching.
 
 *Future Opportunities: Optimize the gridsearch scoring function to incorporate other financial metrics including alpha, beta, max drawdown, etc.*
 
 # Results
 
-Scaling the Features, No PCA, No Feature Selection, and Logistic Regression with Regularization for Feature Selection (L1 and L2 were very similar) on the 15 minute candles produced the best results. The MLP network that provided very similar results had 1 layer and a Logistic activation function. It was pretty much just a Logistic Regression algorithm with a fancier name.
+Scaling the Features, PCA down to 100 dimensions, and the Multilayer Perceptron Model (2 Layers and Logistic Activation Function) provided the best ROC area under the curve and the highest returns. The Logistic Regression with Regularization (L1 and L2 were very similar) produced very similar results and provides more interpretability.
 
-#### ROC Curve
-
-<img src="/imgs/roc_multiple_models.png" width="100%">
-
-#### Returns
-
-<img src="/imgs/returns_mult_models.png" width="100%">
-
-#### Logistic Regression
+#### ROC Curve with Logistic Regression all Candles
 
 <img src="/imgs/lr_gran_auc.png" width="100%">
 
-#### Neural Network
+#### ROC Curve with 15 Minute Candles
 
-<img src="/imgs/nn_gran_auc.png" width="100%">
+<img src="/imgs/roc_multiple_models.png" width="100%">
 
-#### XGBoost Classifier
+#### Returns with 15 Minute Candles
 
-<img src="/imgs/xg_gran_auc.png" width="100%">
+<img src="/imgs/returns_mult_models.png" width="100%">
 
 *Future Opportunities: Stack classification and regression models. Tune a trading strategy based upon probabilities. Use a backtesting library (zipline) incorporating bid / ask spreads, trading fees.*
 
 # Paper Trading
 
-Currently the Logistic Regression model is being Paper Traded (Fake Money with a Demo Account) with the 15 Minute bars. The script is running on a free AWS EC2 instance with a PostgreSQL database to store the historical candles. We'll see how it does...
+Currently the MLP model is being Paper Traded (Fake Money with a Demo Account) with the 15 Minute bars. The script is running on a free AWS EC2 instance with a PostgreSQL database to store the historical candles. We'll see how it does...
 
 # Web Application
 
-The web app has a script that continuously updates the SQL database with new candles for each granularity. A model and predict the future direction for each candle granularity and save predictions. Display the best features for predicting each candle. Display from papertrading.
+The web app has a script that continuously updates the SQL database with new candles for each granularity. A Logistic Regression model is used to predict the future direction for each candle granularity. The predictions and the best features for predicting each candle are displayed in a table.
 
-![alttext](/imgs/webapp.png "Web App")
+<img src="/imgs/webapp.png" width="100%">
 
-
-![alttext](/imgs/tradinglog.png "Trading Log")
+<img src="/imgs/tradinglog.png" width="100%">
 
 # Tech Stack
 

@@ -284,11 +284,11 @@ def get_variety_pipes():
     gpc = GaussianProcessClassifier(n_jobs=-1)
     gnb = GaussianNB()
     qda = QuadraticDiscriminantAnalysis()
-    lr_l2_c1 = Pipeline([('scale',StandardScaler()), ('clf', LogisticRegression(penalty='l2', C=1))])
-    dt = Pipeline([('scale',StandardScaler()), ('clf', DecisionTreeClassifier())])
-    rf = Pipeline([('scale',StandardScaler()), ('clf', RandomForestClassifier(n_estimators=100))])
-    gb = Pipeline([('scale',StandardScaler()), ('clf', GradientBoostingClassifier(n_estimators=500))])
-    mlp = Pipeline([('scale',StandardScaler()), ('clf', MLPClassifier(hidden_layer_sizes=(100,3)))])
+    lr_l2_c1 = Pipeline([('scale',StandardScaler()), ('pca',PCA(100)), ('clf', LogisticRegression(penalty='l2', C=1))])
+    dt = Pipeline([('scale',StandardScaler()), ('pca',PCA(100)),('clf', DecisionTreeClassifier())])
+    rf = Pipeline([('scale',StandardScaler()), ('pca',PCA(100)),('clf', RandomForestClassifier(n_estimators=100))])
+    gb = Pipeline([('scale',StandardScaler()), ('pca',PCA(100)),('clf', GradientBoostingClassifier(n_estimators=100))])
+    mlp = Pipeline([('scale',StandardScaler()), ('pca',PCA(100)),('clf', MLPClassifier(hidden_layer_sizes=(100,100), activation="logistic", batch_size='auto', max_iter=5000, early_stopping=True))])
     # pca_lr_l1 = Pipeline([('pca', PCA(.99)), ('clf', LogisticRegression(penalty='l1', C=1))])
     # pca_lr_l2 = Pipeline([('pca', PCA(.99)), ('clf', LogisticRegression(penalty='l2', C=1))])
     # lr_l2_c10 = Pipeline([('clf', LogisticRegression(penalty='l2', C=10))])
@@ -393,7 +393,7 @@ def get_lr_grids():
     pipes = {}
     for table in table_names:
         table_upper = table.upper()
-        pipes[table+'_lr'] = load_gridsearch('../picklehistory/lr/'+table_upper+'_grid_lr_object_v1.pkl').best_estimator_
+        pipes[table+'_lr'] = Pipeline([('scale',StandardScaler()), ('pca',PCA(100)), ('clf', LogisticRegression(penalty='l2', C=1.0))])
     return pipes
 
 def get_nn_grids():
@@ -409,7 +409,8 @@ def get_xg_grids():
     pipes = {}
     for table in table_names:
         table_upper = table.upper()
-        pipes[table+'_xg'] = load_gridsearch('../picklehistory/xg/'+table_upper+'_grid_xg_object_v1.pkl').best_estimator_
+    pipes[table+'_xg'] = Pipeline([('scale',StandardScaler()), ('pca',PCA(100)), ('clf', XGBClassifier(n_estimators=500))])
+
     return pipes
 
 def dump_live_model():
@@ -548,7 +549,7 @@ def plot_prediction_returns(prediction_df):
     '''
     plot returns
     '''
-    return_cols = [col for col in prediction_df.columns if col[-14:] == '1_pred_returns']
+    return_cols = [col for col in prediction_df.columns if col[-12:] == 'pred_returns']
     for return_col in return_cols:
         pred_returns = prediction_df[return_col]
         cum_returns = pred_returns.cumsum().apply(np.exp)-1 #you can add log returns and then transpose back with np.exp
@@ -815,12 +816,12 @@ if __name__ == '__main__':
     #dump_big_gridsearch()
 
     #live_predict_website()
-    dump_live_model()
+    #dump_live_model()
     # prediction_dfs = all_steps_for_grans_one_model_cross_val()
     #
     #
-    # # prediction_dfs = all_steps_for_models_cross_val()
-    # for_mods_plot_roc_returns(prediction_dfs)
+    prediction_dfs = all_steps_for_models_cross_val()
+    for_mods_plot_roc_returns(prediction_dfs)
 
 
     # df = get_data('EUR_USD_M15', datetime(2012,9,1), datetime(2018,6,1))

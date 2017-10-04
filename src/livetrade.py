@@ -308,7 +308,7 @@ def trade():
             print('iter {}'.format(count))
             last_timestamp = get_last_timestamp(table_name)
             params = {'price': 'M', 'granularity': 'M15',
-                      'count': 5000,
+                      'count': 5,
                       'from': last_timestamp,
                       'includeFirst': False,
                       'alignmentTimezone': 'America/New_York'}
@@ -323,9 +323,9 @@ def trade():
                 start = time.time()
                 data_to_table(table_name, candle)
                 print('added {} candles'.format(len(candle)))
-                # last_month = int(candle[0][0][5:7])-1
-                # last_month_timestamp = candle[0][0][:5]+str(last_month).zfill(2)+candle[0][0][7:]
-                data = return_data_table_gt_time(table_name, '2008-01-01T00:00:00.000000000Z')
+                last_month = int(candle[0][0][5:7])-1
+                last_month_timestamp = candle[0][0][:5]+str(last_month).zfill(2)+candle[0][0][7:]
+                data = return_data_table_gt_time(table_name, last_month_timestamp)
                 df = clean_data(data)
                 df = add_target(df)
                 df = add_features(df)
@@ -391,7 +391,7 @@ def trade():
                     print('y_pred == 0, units < 0')
         except Exception as e:
                 print(e)
-        time.sleep(30)
+        time.sleep(3)
 
 
 if __name__ == '__main__':
