@@ -1,10 +1,3 @@
-
-
-* Put actual return on your predicted return graphs
-* What does paper trading mean?
-
-# * **`WORK IN PROGRESS DUE 10/10/2017`** *
-
 # **EUR/USD Foreign Exchange Rate Prediction**
 
 Using classification machine learning models like logistic regression, neural networks, and boosted trees to predict the future direction of of the EUR/USD foreign exchange rates with technical analysis.

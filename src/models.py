@@ -419,9 +419,9 @@ def dump_live_model():
     df = add_target(df)
     df = add_features(df)
     x, y, last_x_pred, last_x_ohlcv = split_data_x_y(df)
-    model = lr = Pipeline([('scale',StandardScaler()), ('pca',PCA(100)), ('clf', MLPClassifier(hidden_layer_sizes=(100,100), activation="logistic", batch_size='auto', max_iter=5000, early_stopping=True))])
+    model = lr = Pipeline([('scale',StandardScaler()), ('pca',PCA(100)), ('clf', LogisticRegression())])
     model.fit(x, y)
-    pickle.dump(model, open('../picklehistory/live_nn_eur_usd_m15_model.pkl', 'wb'))
+    pickle.dump(model, open('../picklehistory/live_lr_eur_usd_m15_model.pkl', 'wb'))
 
 def var_model_one_gran_pipe_cross_val(x, y, df, pipes, n_splits=2):
     '''
@@ -816,12 +816,12 @@ if __name__ == '__main__':
     #dump_big_gridsearch()
 
     #live_predict_website()
-    #dump_live_model()
+    dump_live_model()
     # prediction_dfs = all_steps_for_grans_one_model_cross_val()
     #
     #
-    prediction_dfs = all_steps_for_models_cross_val()
-    for_mods_plot_roc_returns(prediction_dfs)
+    # prediction_dfs = all_steps_for_models_cross_val()
+    # for_mods_plot_roc_returns(prediction_dfs)
 
 
     # df = get_data('EUR_USD_M15', datetime(2012,9,1), datetime(2018,6,1))
