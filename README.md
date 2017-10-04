@@ -210,6 +210,8 @@ Scaling the Features, PCA down to 100 dimensions, and the Logistic Regression wi
 
 Currently the Logistic Regression model is being Paper Traded (Fake Money with a Demo Account) with the 15 Minute Candle Model. The script is running on a free AWS EC2 instance with a PostgreSQL database to store the historical candles. We'll see how it does...
 
+<img src="/imgs/papertrading.png" width="100%">
+
 # Web Application
 
 The web app has a script that continuously updates the SQL database with new candles for each granularity. Gridsearched Logistic Regression models are used to predict the future direction for each candle granularity then the predictions and best features are displayed in a table.
