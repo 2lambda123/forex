@@ -1,6 +1,6 @@
 # **EUR/USD Foreign Exchange Rate Prediction**
 
-Using classification machine learning models like logistic regression, neural networks, and boosted trees to predict the future direction of of the EUR/USD foreign exchange rates with technical analysis.
+Using classification machine learning models like logistic regression, boosted trees, and neural networks to predict the future direction of of the EUR/USD foreign exchange rates with technical analysis.
 
 #### Table of Contents
 1. [Data Flow Diagram](#data-flow-diagram)
@@ -20,7 +20,7 @@ Using classification machine learning models like logistic regression, neural ne
 
 # Historical Data
 
-The Oanda API was used to download historical EUR_USD candles to a PostgreSQL database. The data contains the volume, open, high, low, close mid prices (between bid / ask prices). The API only allows you to receive 5,000 records per request so I setup a script to download this information overnight. The database contains tables with the exchange price every 5 seconds, 10 seconds, 15 seconds, etc. from 2005 to today.
+The Oanda API was used to download historical EUR/USD candles to a PostgreSQL database. The data contains the volume, open, high, low, close mid prices (between bid / ask prices). The API only allows you to receive 5,000 records per request so I setup a script to download this information overnight. The database contains tables with the exchange price every 5 seconds, 10 seconds, 15 seconds, etc. from 2005 to today.
 
 Granularity | Description
 --- | ---
@@ -190,7 +190,7 @@ Data transformation and modeling pipelines were used to gridsearch cross validat
 
 # Results
 
-Scaling the Features, PCA down to 100 dimensions, and the Multilayer Perceptron Model (2 Layers and Logistic Activation Function) provided the best ROC area under the curve and the highest returns. The Logistic Regression with Regularization (L1 and L2 were very similar) produced very similar results and provides more interpretability.
+Scaling the Features, PCA down to 100 dimensions, and the Logistic Regression with Regularization model provided the best ROC area under the curve and the highest returns. The Multilayer Perceptron Model was a close second.
 
 #### ROC Curve with Logistic Regression all Candles
 
@@ -208,11 +208,11 @@ Scaling the Features, PCA down to 100 dimensions, and the Multilayer Perceptron 
 
 # Paper Trading
 
-Currently the MLP model is being Paper Traded (Fake Money with a Demo Account) with the 15 Minute bars. The script is running on a free AWS EC2 instance with a PostgreSQL database to store the historical candles. We'll see how it does...
+Currently the Logit model is being Paper Traded (Fake Money with a Demo Account) with the 15 Minute bars. The script is running on a free AWS EC2 instance with a PostgreSQL database to store the historical candles. We'll see how it does...
 
 # Web Application
 
-The web app has a script that continuously updates the SQL database with new candles for each granularity. A Logistic Regression model is used to predict the future direction for each candle granularity. The predictions and the best features for predicting each candle are displayed in a table.
+The web app has a script that continuously updates the SQL database with new candles for each granularity. A Logistic Regression model is used to predict the future direction for each candle granularity. The predictions and the best features for each candle are displayed in a table.
 
 <img src="/imgs/webapp.png" width="100%">
 
