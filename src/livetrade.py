@@ -299,7 +299,7 @@ def streamer_ohlcv():
 def trade():
     client = oandapyV20.API(access_token=access_token)
     table_name = 'eur_usd_m15'
-    model = pickle.load(open('../picklehistory/live_nn_eur_usd_m15_model.pkl', 'rb'))
+    model = pickle.load(open('../picklehistory/live_lr_eur_usd_m15_model.pkl', 'rb'))
     #model = Pipeline([('scale',StandardScaler()), ('clf', LogisticRegression(penalty='l2', C=1))])
     count = 0
     while True:
